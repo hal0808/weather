@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: content: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <script src="components/loader.js"></script>
+    <link rel="stylesheet" href="components/loader.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        //天気の情報を表示するメソッド
+        function display(data){
+            $("#msg").text("");
+            $("#weather").text("");
+            //desctiptionの0番目を取り出す
+            //$(data).find("discription:first(:eq(0))").text()  下と同じ結果
+            $("#msg").append("<p>"+$(data).find("description").eq(0).text()+"</p>");
+            // :lt() 指定した数字より前に存在する同じ要素
+            // :gt() 指定した数字より後に存在する同じ要素
+            $(data).find("item:gt(1)").each(function(){
+                var html ="<tr><td valign='top'><img src="+$(this).find("url").text()+"></td><td>"+$(this).find("description").text()+"</td></tr>";
+                $("#weather").append(html);
+            });
+        }
+        
+        // 各県のxmlとajax通信を行う
+        function get_tenki(button){
+            //ボタンのid値を持ってくる
+            var id = $(button).attr("id");
+            console.log("☆"+id);
+            //ajax通信を行う
+            $.ajax({
+                url:'http://javascriptajax.azurewebsites.net/get_tenki.php?city='+id,
+                type:'GET',
+                dataType:'xml',
+        
+            }).done(function(data){
+                //alert("受信成功");
+                display(data);
+            }).fail(function(data){
+                //ajaxの通信に失敗した場合
+                alert("受信失敗");
+            });
+        }
+        
+        $(function(){
+            //県名のボタンが押されたら
+            $(".ken").on("click",function(){
+                get_tenki($(this));
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>天気予報</h1>
+    <input type="button" value="香川県" class="ken" id="370000"><br>
+    <input type="button" value="愛媛県" class="ken" id="380010"><br>
+    <input type="button" value="徳島県" class="ken" id="360010"><br>
+    <input type="button" value="高知県" class="ken" id="390010">
+    <p id="top">↓ここに天気予報を表示します↓</p>
+    <div id="msg"></div>
+    <table style="table-layout: fixed;">
+        <tbody id="weather"></tbody>
+    </table>
+</body>
+</html>
